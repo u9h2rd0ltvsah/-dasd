@@ -9,25 +9,20 @@ jobs:
   setup-android-server:
     runs-on: ubuntu-latest
     container:
-      image: budtmo/docker-android:emulator_9.0
+      image: kasmweb/android:1.14.0
       options: --privileged
     steps:
     - name: Setup Android Cloud with Tunnel
       run: |
-        echo "Waiting for Android emulator to start..."
+        echo "Waiting for Android emulator and web interface to start..."
         sleep 120
-        echo "Installing noVNC..."
-        apt-get update && apt-get install -y novnc python3-websockify
-        echo "Starting noVNC web interface..."
-        websockify 6080 localhost:5900 --web /usr/share/novnc &
-        sleep 10
-        echo "Checking noVNC service..."
-        curl -s localhost:6080 > /dev/null && echo "noVNC is running" || echo "noVNC not responding"
+        echo "Checking web interface..."
+        curl -s localhost:6901 > /dev/null && echo "Web interface is running" || echo "Web interface not responding"
         echo "Installing Cloudflare Tunnel..."
         curl -L -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
         chmod +x /tmp/cloudflared
         echo "Starting Cloudflare tunnel..."
-        /tmp/cloudflared tunnel --url localhost:6080 &
+        /tmp/cloudflared tunnel --url localhost:6901 &
         sleep 5
-        echo "Cloudflare tunnel started. Check the logs above for the temporary URL to access noVNC web interface."
+        echo "Cloudflare tunnel started. Check the logs above for the temporary URL to access Android web interface."
         while true; do sleep 60; done
