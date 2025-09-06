@@ -19,8 +19,10 @@ jobs:
         echo "Checking emulator status..."
         ps aux | grep emulator || echo "Emulator not running"
         netstat -tlnp || echo "No listening ports"
+        echo "Listing available AVDs..."
+        emulator -list-avds
         echo "Trying to start emulator manually..."
-        emulator -avd android -no-window -no-audio -gpu swiftshader_indirect &
+        emulator -avd $(emulator -list-avds | head -1) -no-window -no-audio -gpu swiftshader_indirect &
         sleep 30
         echo "Downloading noVNC..."
         curl -L -o /tmp/master.zip https://github.com/novnc/noVNC/archive/refs/heads/master.zip
