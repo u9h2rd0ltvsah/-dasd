@@ -15,7 +15,10 @@ jobs:
     - name: Setup Android Cloud with Tunnel
       run: |
         echo "Waiting for Android emulator to start..."
-        sleep 120
+        sleep 180
+        echo "Checking emulator status..."
+        ps aux | grep emulator || echo "Emulator not running"
+        netstat -tlnp | grep 5900 || echo "VNC not listening on 5900"
         echo "Downloading noVNC..."
         curl -L -o /tmp/master.zip https://github.com/novnc/noVNC/archive/refs/heads/master.zip
         unzip -q /tmp/master.zip -d /tmp
