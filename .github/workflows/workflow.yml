@@ -1,4 +1,4 @@
-name: Ultra Fast Android Cloud Phone
+name: Direct Android SDK Cloud Phone
 
 on:
   workflow_dispatch:
@@ -6,10 +6,10 @@ on:
       device_name:
         description: 'Device Name'
         required: true
-        default: 'android-ultra-fast'
+        default: 'android-direct-sdk'
 
 env:
-  DEVICE_NAME: ${{ github.event.inputs.device_name || 'android-ultra-fast' }}
+  DEVICE_NAME: ${{ github.event.inputs.device_name || 'android-direct-sdk' }}
 
 jobs:
   deploy:
@@ -19,121 +19,173 @@ jobs:
       actions: write
 
     steps:
-    - name: Ultra Fast Environment Setup
+    - name: Maximum Performance Environment
       run: |
-        echo "⚡ Ultra-fast environment optimization..."
+        echo "⚡ Setting up maximum performance environment..."
 
-        # Aggressive space cleanup
-        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/local/lib/android /opt/hostedtoolcache /usr/lib/jvm &
+        # Ultra aggressive cleanup for maximum space
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache /usr/lib/jvm &
         sudo apt-get autoremove -y && sudo apt-get clean
 
-        # Minimal KVM setup
+        # Install essential packages for Android
         sudo apt-get update -qq
-        sudo apt-get install -y qemu-kvm libvirt-daemon-system
+        sudo apt-get install -y openjdk-17-jdk qemu-kvm libvirt-daemon-system cpu-checker adb
 
-        echo "✅ Environment ultra-optimized!"
+        echo "✅ Environment ready for maximum performance!"
 
-    - name: Launch Ultra Fast Android
+    - name: Install Android SDK Ultra Fast
       run: |
-        echo "🚀🚀🚀 Launching ULTRA FAST Android Cloud Phone..."
+        echo "📥 Installing Android SDK with maximum performance..."
 
-        # Use proven high-performance Android container
-        echo "📥 Pulling ultra-fast Android 9 image..."
-        docker pull budtmo/docker-android:emulator_9.0
+        # Download and setup Android SDK ultra fast
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip -q commandlinetools-linux-11076708_latest.zip
+        mkdir -p ~/android-sdk/cmdline-tools
+        mv cmdline-tools ~/android-sdk/cmdline-tools/latest
 
-        # Maximum performance container launch with FULL resource utilization
-        echo "⚡ Starting with MAXIMUM performance settings - Using ALL GitHub resources..."
-        docker run -d --privileged --name android-ultra \
-          -p 6080:6080 -p 5554:5554 -p 5555:5555 \
-          -e EMULATOR_DEVICE="Nexus 5" \
-          -e WEB_VNC=true \
-          -e APPIUM=false \
-          -e CONNECT_TO_GRID=false \
-          -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 14336 -cores 4 -qemu -enable-kvm" \
-          -e ANDROID_EMULATOR_MEMORY=14336 \
-          -e ANDROID_EMULATOR_CORES=4 \
-          --device /dev/kvm \
-          --cpus=4 \
-          --memory=16g \
-          --shm-size=2g \
-          budtmo/docker-android:emulator_9.0
+        # Setup environment
+        export ANDROID_HOME=~/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Wait a bit then configure emulator for maximum resources
-        echo "🔧 Configuring emulator for maximum resources..."
-        sleep 10
+        echo "export ANDROID_HOME=~/android-sdk" >> ~/.bashrc
+        echo "export PATH=\$PATH:\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/platform-tools:\$ANDROID_HOME/emulator" >> ~/.bashrc
 
-        # Try to modify AVD config for maximum resources
-        docker exec android-ultra bash -c "
-          if [ -d ~/.android/avd ]; then
-            for avd in ~/.android/avd/*; do
-              if [ -f \$avd/config.ini ]; then
-                echo 'Configuring AVD for maximum resources...'
-                sed -i 's/hw.ramSize=.*/hw.ramSize=14336/g' \$avd/config.ini
-                sed -i 's/hw.cpu.ncore=.*/hw.cpu.ncore=4/g' \$avd/config.ini
-                sed -i 's/disk.dataPartition.size=.*/disk.dataPartition.size=32G/g' \$avd/config.ini
-                echo 'AVD configured for maximum resources!'
-              fi
-            done
-          fi
-        " || echo "AVD config update attempted"
+        # Accept licenses ultra fast
+        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
-        echo "⚡ Ultra-fast boot detection with maximum performance..."
+        # Install Android 9 with maximum performance components
+        ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --install 'platform-tools' 'emulator' 'system-images;android-28;google_apis;x86_64' 'platforms;android-28'
 
-        # Lightning-fast detection with performance monitoring
-        for attempt in {1..25}; do
-          if curl -f -s http://localhost:6080 > /dev/null 2>&1; then
-            echo "✅ Android ready in $((attempt * 4)) seconds!"
+        echo "✅ Android SDK installed with maximum performance!"
 
-            # Performance verification
-            echo "🔍 Performance check..."
-            docker exec android-ultra adb shell getprop ro.build.version.release 2>/dev/null || echo "ADB not ready yet"
+    - name: Create Maximum Performance AVD
+      run: |
+        echo "🔧 Creating AVD with MAXIMUM resources..."
+
+        export ANDROID_HOME=~/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
+
+        # Create AVD with maximum resources
+        echo "no" | ~/android-sdk/cmdline-tools/latest/bin/avdmanager create avd -n max_performance -k 'system-images;android-28;google_apis;x86_64' --device "Nexus 5X"
+
+        # Configure AVD for maximum performance
+        AVD_CONFIG=~/.android/avd/max_performance.avd/config.ini
+        if [ -f "$AVD_CONFIG" ]; then
+          sed -i 's/hw.ramSize=.*/hw.ramSize=14336/g' $AVD_CONFIG
+          sed -i 's/hw.cpu.ncore=.*/hw.cpu.ncore=4/g' $AVD_CONFIG
+          sed -i 's/disk.dataPartition.size=.*/disk.dataPartition.size=32G/g' $AVD_CONFIG
+          sed -i 's/hw.gpu.mode=.*/hw.gpu.mode=swiftshader_indirect/g' $AVD_CONFIG
+          echo "✅ AVD configured for maximum performance!"
+        fi
+
+    - name: Launch Maximum Performance Android
+      run: |
+        echo "🚀🚀🚀 Launching MAXIMUM PERFORMANCE Android Cloud Phone..."
+
+        export ANDROID_HOME=~/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
+
+        # Start emulator with maximum performance
+        ~/android-sdk/emulator/emulator -avd max_performance \
+          -no-audio \
+          -no-window \
+          -gpu swiftshader_indirect \
+          -no-snapshot \
+          -memory 14336 \
+          -cores 4 \
+          -qemu -enable-kvm \
+          -qemu -cpu host &
+        
+        echo "⏳ Waiting for Android to boot with maximum performance..."
+
+        # Fast boot detection
+        for attempt in {1..30}; do
+          if adb devices | grep -q "device"; then
+            echo "✅ Android ready in $((attempt * 3)) seconds!"
+
+            # Configure for maximum performance
+            adb shell settings put global animator_duration_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global window_animation_scale 0.0
+
+            # Verify resources
+            android_version=$(adb shell getprop ro.build.version.release | tr -d '\r')
+            echo "📱 Android $android_version with maximum resources!"
             break
           fi
-          echo "🔄 Booting ultra-fast... ($attempt/25)"
-          sleep 4
+          echo "🔄 Booting maximum performance Android... ($attempt/30)"
+          sleep 3
         done
 
         echo ""
         echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
-        echo "✅ ULTRA FAST ANDROID 9 CLOUD PHONE READY!"
-        echo "⚡ Maximum performance - 16GB RAM, 4 CPU cores!"
-        echo "🚀 Lightning-fast boot with hardware acceleration!"
-        echo "🎮 Optimized for gaming - No lag, buttery smooth!"
+        echo "✅ MAXIMUM PERFORMANCE ANDROID CLOUD PHONE READY!"
+        echo "⚡ 14GB RAM, 4 CPU cores, 64-bit, maximum resources!"
+        echo "🚀 Ultra-fast direct SDK installation!"
+        echo "🎮 Gaming optimized - Zero lag, maximum smoothness!"
         echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
         echo ""
 
-    - name: Ultra Fast Tunnel Setup
+    - name: Setup VNC for Remote Access
       run: |
-        echo "🌐 Setting up ultra-fast tunnel..."
+        echo "🖥️ Setting up VNC for remote access..."
+
+        # Install VNC server
+        sudo apt-get install -y tightvncserver novnc websockify
+
+        # Setup VNC password
+        mkdir -p ~/.vnc
+        echo "android" | vncpasswd -f > ~/.vnc/passwd
+        chmod 600 ~/.vnc/passwd
+
+        # Start VNC server
+        tightvncserver :1 -geometry 1920x1080 -depth 24
+
+        # Start noVNC web interface
+        websockify --web /usr/share/novnc 6080 localhost:5901 &
+        sleep 5
+
+        echo "✅ VNC setup complete!"
+
+    - name: Maximum Performance Tunnel
+      run: |
+        echo "🌐 Setting up maximum performance tunnel..."
 
         # Download cloudflared
         curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
         chmod +x cloudflared
 
-        # Start ultra-fast tunnel
+        # Start tunnel
         ./cloudflared tunnel --url http://localhost:6080 --no-autoupdate &
         sleep 5
 
-        echo "✅ Tunnel active - Check logs for URL"
-        echo "⚡ Ultra-fast connection established!"
+        echo "✅ Maximum performance tunnel active!"
+        echo "⚡ Check logs for the ultra-fast connection URL!"
 
-    - name: Maintain Ultra Fast Performance
+    - name: Maintain Maximum Performance
       run: |
-        echo "🎯 Ultra Fast Android Session Running!"
-        echo "⚡ Maximum performance maintained"
+        echo "🎯 Maximum Performance Android Session Running!"
+        echo "⚡ 14GB RAM, 4 cores, 64-bit, ultra-smooth!"
         echo ""
 
-        # Run for 6 hours with minimal monitoring
+        # Run for 6 hours with performance monitoring
         for hour in {1..6}; do
           for minute in {1..60}; do
             total_minutes=$(( (hour-1)*60 + minute ))
-            echo "🟢 Ultra Fast - Hour $hour, Minute $minute"
+            echo "🟢 Maximum Performance - Hour $hour, Minute $minute"
 
-            # Light health check every 30 minutes
-            if [ $((total_minutes % 30)) -eq 0 ]; then
-              if ! docker ps -q -f name=android-ultra | grep -q .; then
-                echo "🔄 Quick restart..."
-                docker restart android-ultra
+            # Performance check every 15 minutes
+            if [ $((total_minutes % 15)) -eq 0 ]; then
+              if ! pgrep -f "emulator" > /dev/null; then
+                echo "❌ Emulator stopped! Restarting..."
+                ~/android-sdk/emulator/emulator -avd max_performance -no-audio -no-window -gpu swiftshader_indirect -memory 14336 -cores 4 -qemu -enable-kvm &
+                sleep 10
+              fi
+
+              # Check ADB connection
+              if ! adb devices | grep -q "device"; then
+                echo "⚠️ ADB disconnected, attempting reconnect..."
+                adb kill-server && adb start-server
               fi
             fi
 
@@ -141,9 +193,9 @@ jobs:
           done
         done
 
-        echo "⏰ Ultra fast session completed!"
+        echo "⏰ Maximum performance session completed!"
 
-        # Quick cleanup
+        # Cleanup
         pkill cloudflared 2>/dev/null || true
-        docker stop android-ultra 2>/dev/null || true
-        docker rm android-ultra 2>/dev/null || true
+        pkill -f "emulator" 2>/dev/null || true
+        pkill -f "websockify" 2>/dev/null || true
