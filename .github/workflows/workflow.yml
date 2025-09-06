@@ -17,6 +17,7 @@ jobs:
     steps:
     - name: Wait for emulator to start
       run: |
+        mkdir -p /github/home/.android
         sleep 30
         adb devices
         adb shell settings put global animator_duration_scale 0.0
