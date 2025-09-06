@@ -49,12 +49,33 @@ jobs:
           -e WEB_VNC=true \
           -e APPIUM=false \
           -e CONNECT_TO_GRID=false \
-          -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 14336 -cores 4 -qemu -enable-kvm -qemu -cpu host" \
+          -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 14336 -cores 4 -qemu -enable-kvm" \
+          -e ANDROID_EMULATOR_MEMORY=14336 \
+          -e ANDROID_EMULATOR_CORES=4 \
           --device /dev/kvm \
           --cpus=4 \
           --memory=16g \
           --shm-size=2g \
           budtmo/docker-android:emulator_9.0
+
+        # Wait a bit then configure emulator for maximum resources
+        echo "🔧 Configuring emulator for maximum resources..."
+        sleep 10
+
+        # Try to modify AVD config for maximum resources
+        docker exec android-ultra bash -c "
+          if [ -d ~/.android/avd ]; then
+            for avd in ~/.android/avd/*; do
+              if [ -f \$avd/config.ini ]; then
+                echo 'Configuring AVD for maximum resources...'
+                sed -i 's/hw.ramSize=.*/hw.ramSize=14336/g' \$avd/config.ini
+                sed -i 's/hw.cpu.ncore=.*/hw.cpu.ncore=4/g' \$avd/config.ini
+                sed -i 's/disk.dataPartition.size=.*/disk.dataPartition.size=32G/g' \$avd/config.ini
+                echo 'AVD configured for maximum resources!'
+              fi
+            done
+          fi
+        " || echo "AVD config update attempted"
 
         echo "⚡ Ultra-fast boot detection with maximum performance..."
 
