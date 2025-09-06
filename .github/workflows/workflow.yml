@@ -117,8 +117,8 @@ jobs:
 
         # Realistic boot detection - Android takes time to boot
         for i in {1..60}; do
-          if adb devices | grep -q device; then
-            echo "✅ Android booted in $((i*5)) seconds!"
+          if adb devices | grep -q "device$"; then
+            echo "✅ Android fully booted in $((i*5)) seconds!"
 
             # Maximum performance settings
             adb shell settings put global animator_duration_scale 0.0
@@ -126,8 +126,11 @@ jobs:
             adb shell settings put global window_animation_scale 0.0
 
             break
+          elif adb devices | grep -q "offline"; then
+            echo "🔄 Android booting (device online but system starting)... ($i/60)"
+          else
+            echo "🔄 Waiting for Android device... ($i/60)"
           fi
-          echo "🔄 Android booting... ($i/60)"
           sleep 5
         done
 
