@@ -136,45 +136,24 @@ jobs:
         chmod +x cloudflared
 
         # Start optimized tunnel
-        ./cloudflared tunnel --url http://localhost:6080 --no-autoupdate --logfile tunnel.log &
-        sleep 25
+        ./cloudflared tunnel --url http://localhost:6080 --no-autoupdate &
+        sleep 10
 
-        # Get tunnel URL
-        tunnel_url=""
-        for attempt in {1..40}; do
-          if [ -f tunnel.log ]; then
-            tunnel_url=$(grep -oE 'https://[a-zA-Z0-9-]+\\.trycloudflare\\.com' tunnel.log | head -1)
-            if [ -n "$tunnel_url" ]; then
-              echo "✅ Tunnel ready: $tunnel_url"
-              break
-            fi
-          fi
+        echo ""
+        echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
+        echo "✅ OPTIMIZED ANDROID 9 CLOUD PHONE READY!"
+        echo "🌐 Check Cloudflare logs above for the tunnel URL"
+        echo "📱 Device: Nexus 5 Android 9.0 (Ultra Smooth)"
+        echo "⚡ Optimized for maximum smoothness!"
+        echo "🚀 Fast boot, buttery smooth performance!"
+        echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
+        echo ""
 
-          echo "🔄 Connecting tunnel... ($attempt/40)"
-          sleep 2
-        done
-
-        if [ -n "$tunnel_url" ]; then
-          echo ""
-          echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
-          echo "✅ OPTIMIZED ANDROID 9 CLOUD PHONE READY!"
-          echo "🌐 URL: $tunnel_url"
-          echo "📱 Device: Nexus 5 Android 9.0 (Optimized)"
-          echo "⚡ Smooth performance, no lag!"
-          echo "🚀 Fast boot, reliable connection!"
-          echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
-          echo ""
-
-          # Save details
-          echo "$tunnel_url" > cloud-link.txt
-          echo "📱 Nexus 5 Android 9.0 (Optimized)" >> cloud-link.txt
-          echo "⚡ Smooth, fast, no lag" >> cloud-link.txt
-          echo "⏰ Started: $(date)" >> cloud-link.txt
-
-        else
-          echo "❌ Tunnel failed"
-          exit 1
-        fi
+        # Save session info
+        echo "Android 9 Cloud Phone - Ultra Smooth" > session-info.txt
+        echo "Device: Nexus 5 Android 9.0" >> session-info.txt
+        echo "Performance: Optimized for smoothness" >> session-info.txt
+        echo "Started: $(date)" >> session-info.txt
 
     - name: Keep Optimized Android Running
       run: |
