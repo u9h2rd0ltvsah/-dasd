@@ -53,15 +53,16 @@ jobs:
 
     - name: Maximum Power AVD
       run: |
-        echo "🔧 Maximum power AVD..."
+        echo "🔧 Lightning AVD setup..."
 
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Create AVD
+        # Create AVD with pre-config
         echo "no" | ~/android-sdk/cmdline-tools/latest/bin/avdmanager create avd -n lightning -k 'system-images;android-28;google_apis;x86_64'
 
-        # Maximum config
+        # Ensure directory exists and create maximum config
+        mkdir -p ~/.android/avd/lightning.avd
         CONFIG=~/.android/avd/lightning.avd/config.ini
         cat > $CONFIG << EOF
         hw.ramSize=14336
@@ -69,9 +70,13 @@ jobs:
         disk.dataPartition.size=32G
         hw.gpu.mode=swiftshader_indirect
         hw.cpu.arch=x86_64
+        hw.keyboard=yes
+        hw.mainKeys=no
+        hw.trackBall=no
+        skin.dynamic=no
         EOF
 
-        echo "✅ Maximum power AVD created!"
+        echo "✅ Lightning AVD ready!"
 
     - name: Launch Lightning Android
       run: |
