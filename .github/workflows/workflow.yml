@@ -14,13 +14,10 @@ jobs:
     steps:
     - name: Setup Android Cloud with Tunnel
       run: |
-        echo "Waiting for Android emulator to start..."
-        sleep 30
-        echo "Installing noVNC for web access..."
-        apt-get update && apt-get install -y novnc websockify
-        echo "Starting noVNC web interface..."
-        websockify --web /usr/share/novnc 6080 localhost:5900 &
-        sleep 5
+        echo "Waiting for Android emulator and noVNC to start..."
+        sleep 60
+        echo "Checking noVNC service..."
+        curl -s localhost:6080 > /dev/null && echo "noVNC is running" || echo "noVNC not responding"
         echo "Installing Cloudflare Tunnel..."
         curl -L -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
         chmod +x /tmp/cloudflared
