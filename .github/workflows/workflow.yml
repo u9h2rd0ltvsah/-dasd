@@ -17,7 +17,7 @@ jobs:
         echo "Waiting for Android emulator to start..."
         sleep 120
         echo "Installing websockify..."
-        python3 -m pip install --break-system-packages websockify
+        python3 -m pip install --user websockify
         echo "Starting noVNC web interface..."
         python3 -m websockify 6080 localhost:5900 &
         sleep 10
