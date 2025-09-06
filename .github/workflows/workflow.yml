@@ -33,7 +33,7 @@ jobs:
 
     - name: Install Android 9 system image
       run: |
-        echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-28;google_apis;x86'
+        echo "y" | java --add-modules java.xml.bind -jar $ANDROID_HOME/cmdline-tools/latest/lib/sdkmanager.jar --install 'system-images;android-28;google_apis;x86'
 
     - name: Create Android Virtual Device (AVD)
       run: |
