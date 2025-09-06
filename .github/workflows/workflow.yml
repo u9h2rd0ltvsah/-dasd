@@ -29,8 +29,13 @@ jobs:
 
         # Fix KVM permissions for GitHub Actions
         sudo usermod -a -G kvm $USER
+        sudo usermod -a -G kvm runner
         sudo chown root:kvm /dev/kvm
         sudo chmod 660 /dev/kvm
+        # Try alternative KVM setup
+        sudo chmod 666 /dev/kvm 2>/dev/null || true
+        # Restart udev
+        sudo systemctl restart udev 2>/dev/null || true
 
         echo "✅ Ready for lightning deployment!"
 
