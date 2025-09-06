@@ -17,13 +17,15 @@ jobs:
     steps:
     - name: Wait for emulator to start
       run: |
-        export ANDROID_HOME=/tmp/android
-        mkdir -p $ANDROID_HOME
+        mkdir -p /tmp/android
         sleep 30
         adb devices
         adb shell settings put global animator_duration_scale 0.0
         adb shell settings put global transition_animation_scale 0.0
         adb shell settings put global window_animation_scale 0.0
+      env:
+        ANDROID_HOME: /tmp/android
+        HOME: /tmp
 
     - name: Install Cloudflare Tunnel
       run: |
