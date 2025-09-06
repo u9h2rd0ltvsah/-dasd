@@ -19,13 +19,14 @@ jobs:
         echo "Checking emulator status..."
         ps aux | grep emulator || echo "Emulator not running"
         netstat -tlnp || echo "No listening ports"
+        echo "Setting Android environment..."
+        export ANDROID_AVD_HOME=/tmp/.android/avd
+        export ANDROID_SDK_HOME=/tmp
+        mkdir -p /tmp/.android/avd
         echo "Listing available AVDs..."
         emulator -list-avds
         echo "Creating AVD if none exist..."
         echo "no" | avdmanager create avd -n test -k 'system-images;android-28;google_apis;x86_64' || echo "AVD creation failed"
-        echo "Setting Android environment..."
-        export ANDROID_AVD_HOME=/tmp/.android/avd
-        export ANDROID_SDK_HOME=/tmp
         echo "Listing AVDs after creation..."
         emulator -list-avds
         echo "Trying to start emulator manually..."
