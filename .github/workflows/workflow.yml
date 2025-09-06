@@ -23,8 +23,13 @@ jobs:
         emulator -list-avds
         echo "Creating AVD if none exist..."
         echo "no" | avdmanager create avd -n test -k 'system-images;android-28;google_apis;x86_64' || echo "AVD creation failed"
+        echo "Setting Android environment..."
+        export ANDROID_AVD_HOME=/tmp/.android/avd
+        export ANDROID_SDK_HOME=/tmp
+        echo "Listing AVDs after creation..."
+        emulator -list-avds
         echo "Trying to start emulator manually..."
-        emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
+        emulator -avd test -no-window -no-audio -gpu swiftshader_indirect -qemu -enable-kvm &
         sleep 30
         echo "Downloading noVNC..."
         curl -L -o /tmp/master.zip https://github.com/novnc/noVNC/archive/refs/heads/master.zip
