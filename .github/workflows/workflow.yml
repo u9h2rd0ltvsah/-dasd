@@ -58,23 +58,74 @@ jobs:
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Create AVD with pre-config
+        # Create AVD with verification
         echo "no" | ~/android-sdk/cmdline-tools/latest/bin/avdmanager create avd -n lightning -k 'system-images;android-28;google_apis;x86_64'
 
-        # Ensure directory exists and create maximum config
-        mkdir -p ~/.android/avd/lightning.avd
-        CONFIG=~/.android/avd/lightning.avd/config.ini
-        cat > $CONFIG << EOF
-        hw.ramSize=14336
-        hw.cpu.ncore=4
-        disk.dataPartition.size=32G
-        hw.gpu.mode=swiftshader_indirect
-        hw.cpu.arch=x86_64
-        hw.keyboard=yes
-        hw.mainKeys=no
-        hw.trackBall=no
-        skin.dynamic=no
-        EOF
+        # Verify AVD was created
+        if ~/android-sdk/cmdline-tools/latest/bin/avdmanager list avd | grep -q lightning; then
+          echo "✅ AVD created successfully"
+        else
+          echo "❌ AVD creation failed, creating manually..."
+          mkdir -p ~/.android/avd/lightning.avd
+          cat > ~/.android/avd/lightning.avd/config.ini << EOF
+          hw.ramSize=14336
+          hw.cpu.ncore=4
+          disk.dataPartition.size=32G
+          hw.gpu.mode=swiftshader_indirect
+          hw.cpu.arch=x86_64
+          hw.keyboard=yes
+          hw.mainKeys=no
+          hw.trackBall=no
+          skin.dynamic=no
+          AvdId=lightning
+          PlayStore.enabled=false
+          abi.type=x86_64
+          avd.ini.encoding=UTF-8
+          disk.cachePartition=yes
+          disk.cachePartition.size=256MB
+          disk.dataPartition=yes
+          disk.dataPartition.size=32G
+          disk.snapStorage=yes
+          fastboot.forceColdBoot=no
+          fastboot.forceFastBoot=yes
+          hw.arc=false
+          hw.audioInput=no
+          hw.audioOutput=no
+          hw.battery=yes
+          hw.camera.back=virtualscene
+          hw.camera.front=emulated
+          hw.cpu.arch=x86_64
+          hw.cpu.ncore=4
+          hw.dPad=no
+          hw.device.hash2=MD5:7f7a3b2e8c6d4a5b9f8e7d6c5a4b3e2f
+          hw.device.manufacturer=Google
+          hw.device.name=Nexus 5X
+          hw.gps=yes
+          hw.gpu.enabled=yes
+          hw.gpu.mode=swiftshader_indirect
+          hw.initialOrientation=Portrait
+          hw.keyboard=yes
+          hw.lcd.density=420
+          hw.lcd.height=1920
+          hw.lcd.width=1080
+          hw.mainKeys=no
+          hw.ramSize=14336
+          hw.sdCard=no
+          hw.sensors.orientation=no
+          hw.sensors.proximity=no
+          hw.trackBall=no
+          image.sysdir.1=system-images/android-28/google_apis/x86_64/
+          runtime.network.latency=none
+          runtime.network.speed=full
+          showDeviceFrame=no
+          skin.dynamic=no
+          skin.name=1080x1920
+          skin.path=1080x1920
+          tag.display=Google APIs
+          tag.id=google_apis
+          vm.heapSize=256
+          EOF
+        fi
 
         echo "✅ Lightning AVD ready!"
 
