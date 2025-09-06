@@ -34,14 +34,11 @@ jobs:
         wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
         dpkg -i cloudflared-linux-amd64.deb
 
-    - name: Authenticate and start Cloudflare Tunnel for VNC
+    - name: Start temporary Cloudflare Tunnel for VNC
       run: |
-        cloudflared tunnel login --token ${{ secrets.CLOUDFLARE_TOKEN }}
-        cloudflared tunnel create android-vnc || echo "Tunnel may already exist"
-        cloudflared tunnel route dns android-vnc yourdomain.com
-        cloudflared tunnel run android-vnc &
-      env:
-        CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+        cloudflared tunnel --url localhost:5900 &
+        sleep 5
+        echo "Tunnel started. Check the logs above for the temporary URL to access VNC."
 
     - name: Keep workflow running
       run: |
