@@ -107,11 +107,12 @@ jobs:
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Maximum power launch with software fallback
+        # Maximum power launch with VNC enabled
         ~/android-sdk/emulator/emulator -avd lightning \
           -no-audio -no-window -gpu swiftshader_indirect \
           -memory 8192 -cores 2 \
-          -accel off &
+          -accel off \
+          -qemu -vnc :1 &
 
         echo "⏳ Realistic Android boot detection (30-60 seconds typical)..."
 
@@ -146,21 +147,20 @@ jobs:
 
     - name: Instant VNC Setup
       run: |
-        echo "🖥️ Instant VNC setup..."
+        echo "🖥️ Setting up VNC connection to Android emulator..."
 
-        # Quick VNC install
-        sudo apt-get install -y tightvncserver novnc websockify
+        # Install VNC tools
+        sudo apt-get install -y novnc websockify
 
-        # VNC setup
-        mkdir -p ~/.vnc
-        echo "android" | vncpasswd -f > ~/.vnc/passwd
-        chmod 600 ~/.vnc/passwd
+        # Wait for emulator to be ready
+        sleep 10
 
-        # Start VNC
-        tightvncserver :1 -geometry 1920x1080
+        # Connect VNC to emulator's display
+        # Android emulator exposes VNC on port 5901 by default
         websockify --web /usr/share/novnc 6080 localhost:5901 &
 
-        echo "✅ Instant VNC ready!"
+        echo "✅ VNC bridge to Android emulator ready!"
+        echo "🌐 VNC will connect to emulator on port 5901"
 
     - name: Lightning Tunnel
       run: |
