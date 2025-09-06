@@ -16,10 +16,11 @@ jobs:
       run: |
         echo "Waiting for Android emulator to start..."
         sleep 120
-        echo "Installing websockify..."
-        python3 -m pip install --user websockify
+        echo "Setting up virtual environment..."
+        python3 -m venv /tmp/venv
+        /tmp/venv/bin/pip install websockify
         echo "Starting noVNC web interface..."
-        python3 -m websockify 6080 localhost:5900 &
+        /tmp/venv/bin/websockify 6080 localhost:5900 &
         sleep 10
         echo "Checking noVNC service..."
         curl -s localhost:6080 > /dev/null && echo "noVNC is running" || echo "noVNC not responding"
