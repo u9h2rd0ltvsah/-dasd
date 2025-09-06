@@ -41,15 +41,15 @@ jobs:
         echo "📥 Pulling ultra-fast Android 9 image..."
         docker pull budtmo/docker-android:emulator_9.0
 
-        # Maximum performance container launch
-        echo "⚡ Starting with ULTRA performance settings..."
+        # Maximum performance container launch with FULL resource utilization
+        echo "⚡ Starting with MAXIMUM performance settings - Using ALL GitHub resources..."
         docker run -d --privileged --name android-ultra \
           -p 6080:6080 -p 5554:5554 -p 5555:5555 \
           -e EMULATOR_DEVICE="Nexus 5" \
           -e WEB_VNC=true \
           -e APPIUM=false \
           -e CONNECT_TO_GRID=false \
-          -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 16384 -cores 4 -qemu -enable-kvm" \
+          -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 14336 -cores 4 -qemu -enable-kvm -qemu -cpu host" \
           --device /dev/kvm \
           --cpus=4 \
           --memory=16g \
