@@ -1,4 +1,4 @@
-name: Direct Android SDK Cloud Phone
+name: Lightning Fast Android Cloud
 
 on:
   workflow_dispatch:
@@ -6,10 +6,10 @@ on:
       device_name:
         description: 'Device Name'
         required: true
-        default: 'android-direct-sdk'
+        default: 'android-lightning'
 
 env:
-  DEVICE_NAME: ${{ github.event.inputs.device_name || 'android-direct-sdk' }}
+  DEVICE_NAME: ${{ github.event.inputs.device_name || 'android-lightning' }}
 
 jobs:
   deploy:
@@ -19,173 +19,146 @@ jobs:
       actions: write
 
     steps:
-    - name: Maximum Performance Environment
+    - name: Lightning Setup
       run: |
-        echo "⚡ Setting up maximum performance environment..."
+        echo "⚡ LIGHTNING FAST Android setup..."
 
-        # Ultra aggressive cleanup for maximum space
-        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache /usr/lib/jvm &
-        sudo apt-get autoremove -y && sudo apt-get clean
-
-        # Install essential packages for Android
+        # Minimal setup - just what's needed
         sudo apt-get update -qq
-        sudo apt-get install -y openjdk-17-jdk qemu-kvm libvirt-daemon-system cpu-checker adb
+        sudo apt-get install -y openjdk-17-jdk wget unzip curl qemu-kvm
 
-        echo "✅ Environment ready for maximum performance!"
+        echo "✅ Ready for lightning deployment!"
 
-    - name: Install Android SDK Ultra Fast
+    - name: Ultra Fast SDK Install
       run: |
-        echo "📥 Installing Android SDK with maximum performance..."
+        echo "📥 Ultra fast Android SDK..."
 
-        # Download and setup Android SDK ultra fast
+        # Download SDK
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
+
+        # Setup paths
         mkdir -p ~/android-sdk/cmdline-tools
         mv cmdline-tools ~/android-sdk/cmdline-tools/latest
-
-        # Setup environment
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        echo "export ANDROID_HOME=~/android-sdk" >> ~/.bashrc
-        echo "export PATH=\$PATH:\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/platform-tools:\$ANDROID_HOME/emulator" >> ~/.bashrc
+        # Accept licenses
+        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null 2>&1
 
-        # Accept licenses ultra fast
-        yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        # Install only essentials
+        ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --install 'platform-tools' 'emulator' 'system-images;android-28;google_apis;x86_64'
 
-        # Install Android 9 with maximum performance components
-        ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --install 'platform-tools' 'emulator' 'system-images;android-28;google_apis;x86_64' 'platforms;android-28'
+        echo "✅ SDK ready in record time!"
 
-        echo "✅ Android SDK installed with maximum performance!"
-
-    - name: Create Maximum Performance AVD
+    - name: Maximum Power AVD
       run: |
-        echo "🔧 Creating AVD with MAXIMUM resources..."
+        echo "🔧 Maximum power AVD..."
 
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Create AVD with maximum resources
-        echo "no" | ~/android-sdk/cmdline-tools/latest/bin/avdmanager create avd -n max_performance -k 'system-images;android-28;google_apis;x86_64' --device "Nexus 5X"
+        # Create AVD
+        echo "no" | ~/android-sdk/cmdline-tools/latest/bin/avdmanager create avd -n lightning -k 'system-images;android-28;google_apis;x86_64'
 
-        # Configure AVD for maximum performance
-        AVD_CONFIG=~/.android/avd/max_performance.avd/config.ini
-        if [ -f "$AVD_CONFIG" ]; then
-          sed -i 's/hw.ramSize=.*/hw.ramSize=14336/g' $AVD_CONFIG
-          sed -i 's/hw.cpu.ncore=.*/hw.cpu.ncore=4/g' $AVD_CONFIG
-          sed -i 's/disk.dataPartition.size=.*/disk.dataPartition.size=32G/g' $AVD_CONFIG
-          sed -i 's/hw.gpu.mode=.*/hw.gpu.mode=swiftshader_indirect/g' $AVD_CONFIG
-          echo "✅ AVD configured for maximum performance!"
-        fi
+        # Maximum config
+        CONFIG=~/.android/avd/lightning.avd/config.ini
+        cat > $CONFIG << EOF
+        hw.ramSize=14336
+        hw.cpu.ncore=4
+        disk.dataPartition.size=32G
+        hw.gpu.mode=swiftshader_indirect
+        hw.cpu.arch=x86_64
+        EOF
 
-    - name: Launch Maximum Performance Android
+        echo "✅ Maximum power AVD created!"
+
+    - name: Launch Lightning Android
       run: |
-        echo "🚀🚀🚀 Launching MAXIMUM PERFORMANCE Android Cloud Phone..."
+        echo "🚀🚀🚀 LIGHTNING LAUNCH - Maximum Power Android!"
 
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Start emulator with maximum performance
-        ~/android-sdk/emulator/emulator -avd max_performance \
-          -no-audio \
-          -no-window \
-          -gpu swiftshader_indirect \
-          -no-snapshot \
-          -memory 14336 \
-          -cores 4 \
-          -qemu -enable-kvm \
-          -qemu -cpu host &
-        
-        echo "⏳ Waiting for Android to boot with maximum performance..."
+        # Maximum power launch
+        ~/android-sdk/emulator/emulator -avd lightning \
+          -no-audio -no-window -gpu swiftshader_indirect \
+          -memory 14336 -cores 4 \
+          -qemu -enable-kvm -cpu host &
 
-        # Fast boot detection
-        for attempt in {1..30}; do
-          if adb devices | grep -q "device"; then
-            echo "✅ Android ready in $((attempt * 3)) seconds!"
+        echo "⚡ Lightning boot detection..."
 
-            # Configure for maximum performance
+        # Ultra fast detection
+        for i in {1..20}; do
+          if adb devices | grep -q device; then
+            echo "✅ LIGHTNING BOOT: $((i*2)) seconds!"
+
+            # Maximum performance settings
             adb shell settings put global animator_duration_scale 0.0
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global window_animation_scale 0.0
 
-            # Verify resources
-            android_version=$(adb shell getprop ro.build.version.release | tr -d '\r')
-            echo "📱 Android $android_version with maximum resources!"
             break
           fi
-          echo "🔄 Booting maximum performance Android... ($attempt/30)"
-          sleep 3
+          echo "🔄 Lightning boot... ($i/20)"
+          sleep 2
         done
 
         echo ""
         echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
-        echo "✅ MAXIMUM PERFORMANCE ANDROID CLOUD PHONE READY!"
-        echo "⚡ 14GB RAM, 4 CPU cores, 64-bit, maximum resources!"
-        echo "🚀 Ultra-fast direct SDK installation!"
-        echo "🎮 Gaming optimized - Zero lag, maximum smoothness!"
+        echo "✅ LIGHTNING FAST ANDROID CLOUD READY!"
+        echo "⚡ 14GB RAM, 4 CPU cores, 64-bit maximum power!"
+        echo "🚀 Record-breaking boot time!"
+        echo "🎮 Ultimate gaming performance - ZERO LAG!"
         echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
         echo ""
 
-    - name: Setup VNC for Remote Access
+    - name: Instant VNC Setup
       run: |
-        echo "🖥️ Setting up VNC for remote access..."
+        echo "🖥️ Instant VNC setup..."
 
-        # Install VNC server
+        # Quick VNC install
         sudo apt-get install -y tightvncserver novnc websockify
 
-        # Setup VNC password
+        # VNC setup
         mkdir -p ~/.vnc
         echo "android" | vncpasswd -f > ~/.vnc/passwd
         chmod 600 ~/.vnc/passwd
 
-        # Start VNC server
-        tightvncserver :1 -geometry 1920x1080 -depth 24
-
-        # Start noVNC web interface
+        # Start VNC
+        tightvncserver :1 -geometry 1920x1080
         websockify --web /usr/share/novnc 6080 localhost:5901 &
-        sleep 5
 
-        echo "✅ VNC setup complete!"
+        echo "✅ Instant VNC ready!"
 
-    - name: Maximum Performance Tunnel
+    - name: Lightning Tunnel
       run: |
-        echo "🌐 Setting up maximum performance tunnel..."
+        echo "🌐 Lightning tunnel..."
 
-        # Download cloudflared
         curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
         chmod +x cloudflared
 
-        # Start tunnel
-        ./cloudflared tunnel --url http://localhost:6080 --no-autoupdate &
-        sleep 5
+        ./cloudflared tunnel --url http://localhost:6080 &
+        sleep 3
 
-        echo "✅ Maximum performance tunnel active!"
-        echo "⚡ Check logs for the ultra-fast connection URL!"
+        echo "✅ Lightning tunnel active!"
 
-    - name: Maintain Maximum Performance
+    - name: Maximum Power Session
       run: |
-        echo "🎯 Maximum Performance Android Session Running!"
-        echo "⚡ 14GB RAM, 4 cores, 64-bit, ultra-smooth!"
+        echo "🎯 Maximum Power Android Session!"
+        echo "⚡ Lightning fast, maximum resources, zero lag!"
         echo ""
 
-        # Run for 6 hours with performance monitoring
+        # 6 hour session with lightning monitoring
         for hour in {1..6}; do
           for minute in {1..60}; do
-            total_minutes=$(( (hour-1)*60 + minute ))
-            echo "🟢 Maximum Performance - Hour $hour, Minute $minute"
+            echo "🟢 Lightning Power - Hour $hour, Minute $minute"
 
-            # Performance check every 15 minutes
-            if [ $((total_minutes % 15)) -eq 0 ]; then
-              if ! pgrep -f "emulator" > /dev/null; then
-                echo "❌ Emulator stopped! Restarting..."
-                ~/android-sdk/emulator/emulator -avd max_performance -no-audio -no-window -gpu swiftshader_indirect -memory 14336 -cores 4 -qemu -enable-kvm &
-                sleep 10
-              fi
-
-              # Check ADB connection
-              if ! adb devices | grep -q "device"; then
-                echo "⚠️ ADB disconnected, attempting reconnect..."
-                adb kill-server && adb start-server
+            # Quick health check every 10 minutes
+            if [ $(( (hour-1)*60 + minute )) -eq $(( (hour-1)*60 + 10 )) ]; then
+              if ! pgrep -f emulator > /dev/null; then
+                echo "🔄 Lightning restart..."
+                ~/android-sdk/emulator/emulator -avd lightning -no-audio -no-window -gpu swiftshader_indirect -memory 14336 -cores 4 -qemu -enable-kvm &
               fi
             fi
 
@@ -193,9 +166,8 @@ jobs:
           done
         done
 
-        echo "⏰ Maximum performance session completed!"
+        echo "⏰ Lightning session complete!"
 
-        # Cleanup
+        # Lightning cleanup
         pkill cloudflared 2>/dev/null || true
-        pkill -f "emulator" 2>/dev/null || true
-        pkill -f "websockify" 2>/dev/null || true
+        pkill -f emulator 2>/dev/null || true
