@@ -107,11 +107,11 @@ jobs:
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
-        # Maximum power launch
+        # Maximum power launch with software fallback
         ~/android-sdk/emulator/emulator -avd lightning \
           -no-audio -no-window -gpu swiftshader_indirect \
-          -memory 14336 -cores 4 \
-          -qemu -enable-kvm -cpu host &
+          -memory 8192 -cores 2 \
+          -no-accel -cpu host &
 
         echo "⏳ Realistic Android boot detection (30-60 seconds typical)..."
 
