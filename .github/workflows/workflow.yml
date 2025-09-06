@@ -22,7 +22,7 @@ jobs:
         echo "Listing available AVDs..."
         emulator -list-avds
         echo "Creating AVD if none exist..."
-        echo "no" | avdmanager create avd -n test -k 'system-images;android-28;google_apis;x86' || echo "AVD creation failed"
+        echo "no" | avdmanager create avd -n test -k 'system-images;android-28;google_apis;x86_64' || echo "AVD creation failed"
         echo "Trying to start emulator manually..."
         emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
         sleep 30
