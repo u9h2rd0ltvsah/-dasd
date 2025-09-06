@@ -72,10 +72,10 @@ jobs:
           mkdir -p ~/.android/avd/lightning.avd
         fi
 
-        # Create config.ini
+        # Create config.ini with realistic storage
         echo "hw.ramSize=14336" > ~/.android/avd/lightning.avd/config.ini
         echo "hw.cpu.ncore=4" >> ~/.android/avd/lightning.avd/config.ini
-        echo "disk.dataPartition.size=32G" >> ~/.android/avd/lightning.avd/config.ini
+        echo "disk.dataPartition.size=8G" >> ~/.android/avd/lightning.avd/config.ini
         echo "hw.gpu.mode=swiftshader_indirect" >> ~/.android/avd/lightning.avd/config.ini
         echo "hw.cpu.arch=x86_64" >> ~/.android/avd/lightning.avd/config.ini
         echo "AvdId=lightning" >> ~/.android/avd/lightning.avd/config.ini
