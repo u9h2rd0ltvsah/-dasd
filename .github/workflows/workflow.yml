@@ -111,7 +111,7 @@ jobs:
         ~/android-sdk/emulator/emulator -avd lightning \
           -no-audio -no-window -gpu swiftshader_indirect \
           -memory 8192 -cores 2 \
-          -no-accel &
+          -accel off &
 
         echo "⏳ Realistic Android boot detection (30-60 seconds typical)..."
 
