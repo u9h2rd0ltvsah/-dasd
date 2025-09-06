@@ -120,10 +120,11 @@ jobs:
           if adb devices | grep -q "device$"; then
             echo "✅ Android fully booted in $((i*5)) seconds!"
 
-            # Maximum performance settings
-            adb shell settings put global animator_duration_scale 0.0
-            adb shell settings put global transition_animation_scale 0.0
-            adb shell settings put global window_animation_scale 0.0
+            # Maximum performance settings (optional)
+            echo "⚡ Applying performance optimizations..."
+            adb shell settings put global animator_duration_scale 0.0 || echo "Settings not ready yet"
+            adb shell settings put global transition_animation_scale 0.0 || echo "Settings not ready yet"
+            adb shell settings put global window_animation_scale 0.0 || echo "Settings not ready yet"
 
             break
           elif adb devices | grep -q "offline"; then
