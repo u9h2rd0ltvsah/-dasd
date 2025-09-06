@@ -58,11 +58,21 @@ jobs:
         export ANDROID_HOME=~/android-sdk
         export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 
+        # Create AVD directory first
+        mkdir -p ~/.android/avd
+
         # Create AVD with verification
         echo "no" | ~/android-sdk/cmdline-tools/latest/bin/avdmanager create avd -n lightning -k 'system-images;android-28;google_apis;x86_64'
 
-        # Simple AVD creation with basic config
-        mkdir -p ~/.android/avd/lightning.avd
+        # Check if AVD was created
+        if [ -d ~/.android/avd/lightning.avd ]; then
+          echo "✅ AVD directory exists"
+        else
+          echo "❌ AVD directory missing, creating manually..."
+          mkdir -p ~/.android/avd/lightning.avd
+        fi
+
+        # Create config.ini
         echo "hw.ramSize=14336" > ~/.android/avd/lightning.avd/config.ini
         echo "hw.cpu.ncore=4" >> ~/.android/avd/lightning.avd/config.ini
         echo "disk.dataPartition.size=32G" >> ~/.android/avd/lightning.avd/config.ini
@@ -71,6 +81,12 @@ jobs:
         echo "AvdId=lightning" >> ~/.android/avd/lightning.avd/config.ini
         echo "hw.device.name=Nexus 5X" >> ~/.android/avd/lightning.avd/config.ini
         echo "image.sysdir.1=system-images/android-28/google_apis/x86_64/" >> ~/.android/avd/lightning.avd/config.ini
+
+        # Create the .ini file that Android looks for
+        echo "avd.ini.encoding=UTF-8" > ~/.android/avd/lightning.ini
+        echo "path=~/.android/avd/lightning.avd" >> ~/.android/avd/lightning.ini
+        echo "path.rel=avd/lightning.avd" >> ~/.android/avd/lightning.ini
+        echo "target=android-28" >> ~/.android/avd/lightning.ini
 
         echo "✅ Lightning AVD ready!"
 
@@ -87,12 +103,12 @@ jobs:
           -memory 14336 -cores 4 \
           -qemu -enable-kvm -cpu host &
 
-        echo "⚡ Lightning boot detection..."
+        echo "⏳ Realistic Android boot detection (30-60 seconds typical)..."
 
-        # Ultra fast detection
-        for i in {1..20}; do
+        # Realistic boot detection - Android takes time to boot
+        for i in {1..60}; do
           if adb devices | grep -q device; then
-            echo "✅ LIGHTNING BOOT: $((i*2)) seconds!"
+            echo "✅ Android booted in $((i*5)) seconds!"
 
             # Maximum performance settings
             adb shell settings put global animator_duration_scale 0.0
@@ -101,8 +117,8 @@ jobs:
 
             break
           fi
-          echo "🔄 Lightning boot... ($i/20)"
-          sleep 2
+          echo "🔄 Android booting... ($i/60)"
+          sleep 5
         done
 
         echo ""
