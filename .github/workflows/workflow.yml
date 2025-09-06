@@ -11,9 +11,6 @@ jobs:
     container:
       image: budtmo/docker-android:emulator_9.0
       options: --privileged
-    services:
-      docker:
-        image: docker:dind
     steps:
     - name: Setup Android Cloud with Tunnel
       run: |
