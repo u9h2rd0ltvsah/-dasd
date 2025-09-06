@@ -22,10 +22,10 @@ jobs:
 
     - name: Install Cloudflare Tunnel
       run: |
-        apt-get update
-        apt-get install -y wget
+        sudo apt-get update
+        sudo apt-get install -y wget
         wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-        dpkg -i cloudflared-linux-amd64.deb
+        sudo dpkg -i cloudflared-linux-amd64.deb
 
     - name: Start temporary Cloudflare Tunnel for VNC
       run: |
