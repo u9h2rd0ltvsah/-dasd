@@ -18,7 +18,10 @@ jobs:
         sleep 180
         echo "Checking emulator status..."
         ps aux | grep emulator || echo "Emulator not running"
-        netstat -tlnp | grep 5900 || echo "VNC not listening on 5900"
+        netstat -tlnp || echo "No listening ports"
+        echo "Trying to start emulator manually..."
+        emulator -avd android -no-window -no-audio -gpu swiftshader_indirect &
+        sleep 30
         echo "Downloading noVNC..."
         curl -L -o /tmp/master.zip https://github.com/novnc/noVNC/archive/refs/heads/master.zip
         unzip -q /tmp/master.zip -d /tmp
