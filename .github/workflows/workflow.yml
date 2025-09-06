@@ -67,7 +67,7 @@ jobs:
         else
           echo "❌ AVD creation failed, creating manually..."
           mkdir -p ~/.android/avd/lightning.avd
-          cat > ~/.android/avd/lightning.avd/config.ini << EOF
+          cat > ~/.android/avd/lightning.avd/config.ini << 'EOF'
           hw.ramSize=14336
           hw.cpu.ncore=4
           disk.dataPartition.size=32G
@@ -124,7 +124,7 @@ jobs:
           tag.display=Google APIs
           tag.id=google_apis
           vm.heapSize=256
-          EOF
+EOF
         fi
 
         echo "✅ Lightning AVD ready!"
