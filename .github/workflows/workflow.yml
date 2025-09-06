@@ -15,18 +15,19 @@ jobs:
       docker:
         image: docker:dind
     steps:
-    - name: Wait for emulator to start
+    - name: Setup Android Cloud with Tunnel
       run: |
+        echo "Waiting for Android emulator to start..."
         sleep 30
-        echo "Android emulator should be running in the container"
-
-    - name: Install Cloudflare Tunnel
-      run: |
+        echo "Installing noVNC for web access..."
+        apt-get update && apt-get install -y novnc websockify
+        echo "Starting noVNC web interface..."
+        websockify --web /usr/share/novnc 6080 localhost:5900 &
+        sleep 5
+        echo "Installing Cloudflare Tunnel..."
         curl -L -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
         chmod +x /tmp/cloudflared
-
-    - name: Start Cloudflare Tunnel for VNC
-      run: |
+        echo "Starting Cloudflare tunnel..."
         /tmp/cloudflared tunnel --url localhost:6080 &
         sleep 5
         echo "Cloudflare tunnel started. Check the logs above for the temporary URL to access noVNC web interface."
