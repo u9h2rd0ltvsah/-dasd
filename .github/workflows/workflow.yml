@@ -9,7 +9,7 @@ jobs:
   setup-android-server:
     runs-on: ubuntu-latest
     container:
-      image: budtmo/docker-android-x86-9.0
+      image: budtmo/docker-android:emulator_9.0
       options: --privileged
     services:
       docker:
