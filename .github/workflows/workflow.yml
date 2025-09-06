@@ -22,7 +22,7 @@ jobs:
         heap-size: 512M
         disk-size: 8G
         cores: 8
-        emulator-options: -qemu -enable-kvm -cpu qemu64,-avx,-f16c
+        emulator-options: -no-window -no-audio -gpu swiftshader_indirect -qemu -enable-kvm
         script: |
           adb shell settings put global animator_duration_scale 0.0
           adb shell settings put global transition_animation_scale 0.0
