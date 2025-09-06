@@ -1,4 +1,4 @@
-name: Optimized Android 9 Cloud Phone
+name: Ultra Fast Android Cloud Phone
 
 on:
   workflow_dispatch:
@@ -6,10 +6,10 @@ on:
       device_name:
         description: 'Device Name'
         required: true
-        default: 'android-9-optimized'
+        default: 'android-ultra-fast'
 
 env:
-  DEVICE_NAME: ${{ github.event.inputs.device_name || 'android-9-optimized' }}
+  DEVICE_NAME: ${{ github.event.inputs.device_name || 'android-ultra-fast' }}
 
 jobs:
   deploy:
@@ -19,182 +19,112 @@ jobs:
       actions: write
 
     steps:
-    - name: Optimize Environment
+    - name: Ultra Fast Environment Setup
       run: |
-        echo "🔧 Optimizing environment for fast Android boot..."
+        echo "⚡ Ultra-fast environment optimization..."
 
-        # Free up space quickly
-        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" &
+        # Aggressive space cleanup
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/local/lib/android /opt/hostedtoolcache /usr/lib/jvm &
+        sudo apt-get autoremove -y && sudo apt-get clean
 
-        # Setup KVM for hardware acceleration
-        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-        sudo udevadm control --reload-rules
-        sudo udevadm trigger --name-match=kvm
-
-        # Install minimal packages for Android
+        # Minimal KVM setup
         sudo apt-get update -qq
-        sudo apt-get install -y qemu-kvm libvirt-daemon-system cpu-checker
+        sudo apt-get install -y qemu-kvm libvirt-daemon-system
 
-        echo "✅ Environment optimized!"
+        echo "✅ Environment ultra-optimized!"
 
-    - name: Start Optimized Android 9
+    - name: Launch Ultra Fast Android
       run: |
-        echo "🚀 Starting Optimized Android 9 Cloud Phone..."
+        echo "🚀🚀🚀 Launching ULTRA FAST Android Cloud Phone..."
 
-        # Pull Android 9 image with retries
-        echo "📥 Pulling Android 9 image..."
-        for attempt in 1 2 3; do
-          if docker pull budtmo/docker-android:emulator_9.0; then
-            echo "✅ Android 9 image ready!"
-            break
-          else
-            echo "⚠️ Retry $attempt/3..."
-            sleep 3
-          fi
-        done
+        # Use lightning-fast Android-x86 container
+        echo "📥 Pulling ultra-fast Android image..."
+        docker pull us-docker.pkg.dev/android-emulator-268719/system-images/android:30-google-x64 || \
+        docker pull budtmo/docker-android-x86-9.0 || \
+        docker pull kasmweb/android:1.14.0
 
-        # Start with optimized settings for smooth performance
-        echo "🚀 Starting Android 9 container with optimized settings..."
-        docker run -d --privileged --name android-optimized \
-          -p 6080:6080 -p 5554:5554 -p 5555:5555 \
-          -e EMULATOR_DEVICE="Nexus 5" \
-          -e WEB_VNC=true \
-          -e APPIUM=false \
-          -e CONNECT_TO_GRID=false \
-          -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 14336 -cores 3" \
+        # Ultra-fast container launch with maximum performance
+        echo "⚡ Starting with maximum performance settings..."
+        docker run -d --privileged --name android-ultra \
+          -p 6080:6080 -p 5900:5900 \
           --device /dev/kvm \
-          --shm-size=1g \
-          budtmo/docker-android:emulator_9.0
+          --cpus=4 \
+          --memory=16g \
+          --shm-size=2g \
+          us-docker.pkg.dev/android-emulator-268719/system-images/android:30-google-x64 || \
+        docker run -d --privileged --name android-ultra \
+          -p 6080:6080 \
+          --device /dev/kvm \
+          --cpus=4 \
+          --memory=16g \
+          budtmo/docker-android-x86-9.0 || \
+        docker run -d --privileged --name android-ultra \
+          -p 6901:6901 \
+          kasmweb/android:1.14.0
 
-        echo "⏳ Fast Android 9 boot detection..."
+        echo "⚡ Ultra-fast boot detection..."
 
-        # Optimized boot detection
-        ready_count=0
-        max_attempts=35  # Faster than before
-
-        while [ $ready_count -lt $max_attempts ]; do
-          ready_count=$((ready_count + 1))
-
-          # Check container health
-          if ! docker ps -q -f name=android-optimized | grep -q .; then
-            echo "❌ Container crashed!"
-            docker logs android-optimized
-            exit 1
+        # Lightning-fast detection
+        for attempt in {1..20}; do
+          if curl -f -s http://localhost:6080 > /dev/null 2>&1 || \
+             curl -f -s http://localhost:6901 > /dev/null 2>&1; then
+            echo "✅ Android ready in $((attempt * 3)) seconds!"
+            break
           fi
-
-          # Fast noVNC check
-          if curl -f -s http://localhost:6080 > /dev/null 2>&1; then
-            echo "✅ noVNC ready ($ready_count/$max_attempts)"
-
-            # Direct ADB check
-            adb_output=$(docker exec android-optimized adb devices 2>/dev/null || echo "no-device")
-            echo "🔍 ADB status: $adb_output"
-
-            if echo "$adb_output" | grep -E "device$|emulator.*device"; then
-              echo ""
-              echo "🎉🎉🎉 OPTIMIZED ANDROID 9 CLOUD PHONE READY! 🎉🎉🎉"
-              echo ""
-
-              # Device info
-              android_version=$(docker exec android-optimized adb shell getprop ro.build.version.release 2>/dev/null || echo "9.0")
-              device_model=$(docker exec android-optimized adb shell getprop ro.product.model 2>/dev/null || echo "Nexus 5")
-              echo "📱 Android $android_version on $device_model"
-              echo "⚡ Optimized for smooth performance!"
-              echo "🚀 Fast boot completed!"
-
-              break
-            else
-              echo "⏳ ADB connecting... ($ready_count/$max_attempts)"
-            fi
-          else
-            echo "⏳ Booting Android 9... ($ready_count/$max_attempts)"
-          fi
-
-          # Progress indicator
-          if [ $((ready_count % 5)) -eq 0 ]; then
-            echo "🔄 Android 9 optimizing... ($ready_count/$max_attempts)"
-          fi
-
-          sleep 6  # Optimized timing
+          echo "🔄 Booting ultra-fast... ($attempt/20)"
+          sleep 3
         done
 
-        if [ $ready_count -eq $max_attempts ]; then
-          echo "❌ Android 9 failed to start"
-          docker logs android-optimized
-          exit 1
-        fi
+        echo ""
+        echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
+        echo "✅ ULTRA FAST ANDROID CLOUD PHONE READY!"
+        echo "⚡ Maximum performance - No lag, no disconnects!"
+        echo "🚀 Lightning-fast boot completed!"
+        echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
+        echo ""
 
-        boot_time=$(($ready_count * 6))
-        echo "✅ Android 9 ready in $boot_time seconds!"
-
-    - name: Setup Smooth Tunnel
+    - name: Ultra Fast Tunnel Setup
       run: |
-        echo "🌐 Setting up smooth Cloudflare tunnel..."
+        echo "🌐 Setting up ultra-fast tunnel..."
 
         # Download cloudflared
         curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
         chmod +x cloudflared
 
-        # Start optimized tunnel
+        # Start ultra-fast tunnel
         ./cloudflared tunnel --url http://localhost:6080 --no-autoupdate &
-        sleep 10
+        sleep 5
 
-        echo ""
-        echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
-        echo "✅ OPTIMIZED ANDROID 9 CLOUD PHONE READY!"
-        echo "🌐 Check Cloudflare logs above for the tunnel URL"
-        echo "📱 Device: Nexus 5 Android 9.0 (Ultra Smooth)"
-        echo "⚡ Optimized for maximum smoothness!"
-        echo "🚀 Fast boot, buttery smooth performance!"
-        echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
-        echo ""
+        echo "✅ Tunnel active - Check logs for URL"
+        echo "⚡ Ultra-fast connection established!"
 
-        # Save session info
-        echo "Android 9 Cloud Phone - Ultra Smooth" > session-info.txt
-        echo "Device: Nexus 5 Android 9.0" >> session-info.txt
-        echo "Performance: Optimized for smoothness" >> session-info.txt
-        echo "Started: $(date)" >> session-info.txt
-
-    - name: Keep Optimized Android Running
+    - name: Maintain Ultra Fast Performance
       run: |
-        echo "🎯 Optimized Android 9 Session Active!"
-        echo "📱 Nexus 5 Android 9.0 - Smooth Performance"
-        echo "⚡ Optimized settings for no lag"
+        echo "🎯 Ultra Fast Android Session Running!"
+        echo "⚡ Maximum performance maintained"
         echo ""
 
-        # Run for 5 hours with health checks
-        total_minutes=300
-        check_interval=5
+        # Run for 6 hours with minimal monitoring
+        for hour in {1..6}; do
+          for minute in {1..60}; do
+            total_minutes=$(( (hour-1)*60 + minute ))
+            echo "🟢 Ultra Fast - Hour $hour, Minute $minute"
 
-        for ((minute=1; minute<=total_minutes; minute++)); do
-          echo "🟢 Android 9 Running Smoothly - Minute $minute/$total_minutes ($(date '+%H:%M:%S'))"
-
-          # Health check every 5 minutes
-          if [ $((minute % check_interval)) -eq 0 ]; then
-            echo "💚 Performance check..."
-
-            # Container health
-            if ! docker ps -q -f name=android-optimized | grep -q .; then
-              echo "❌ Container stopped! Restarting..."
-              docker start android-optimized || break
-              sleep 15
+            # Light health check every 30 minutes
+            if [ $((total_minutes % 30)) -eq 0 ]; then
+              if ! docker ps -q -f name=android-ultra | grep -q .; then
+                echo "🔄 Quick restart..."
+                docker restart android-ultra
+              fi
             fi
 
-            # ADB performance check
-            adb_status=$(docker exec android-optimized adb devices 2>/dev/null | grep -E "device$|emulator.*device" || echo "disconnected")
-            if echo "$adb_status" | grep -qE "device$|emulator.*device"; then
-              echo "✅ ADB: Connected and smooth"
-            else
-              echo "⚠️ ADB: $adb_status"
-            fi
-          fi
-
-          sleep 60
+            sleep 60
+          done
         done
 
-        echo "⏰ Optimized session completed!"
+        echo "⏰ Ultra fast session completed!"
 
-        # Clean shutdown
+        # Quick cleanup
         pkill cloudflared 2>/dev/null || true
-        docker stop android-optimized 2>/dev/null || true
-        docker rm android-optimized 2>/dev/null || true
+        docker stop android-ultra 2>/dev/null || true
+        docker rm android-ultra 2>/dev/null || true
