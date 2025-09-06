@@ -17,15 +17,8 @@ jobs:
     steps:
     - name: Wait for emulator to start
       run: |
-        mkdir -p /tmp/android
         sleep 30
-        adb devices
-        adb shell settings put global animator_duration_scale 0.0
-        adb shell settings put global transition_animation_scale 0.0
-        adb shell settings put global window_animation_scale 0.0
-      env:
-        ANDROID_HOME: /tmp/android
-        HOME: /tmp
+        echo "Android emulator should be running in the container"
 
     - name: Install Cloudflare Tunnel
       run: |
