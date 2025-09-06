@@ -16,11 +16,6 @@ jobs:
       run: |
         echo "Waiting for Android emulator and noVNC to start..."
         sleep 120
-        echo "Installing noVNC..."
-        apt-get update && apt-get install -y novnc python3-websockify
-        echo "Starting noVNC web interface..."
-        python3 -m websockify 6080 localhost:5900 --web /usr/share/novnc &
-        sleep 10
         echo "Checking noVNC service..."
         curl -s localhost:6080 > /dev/null && echo "noVNC is running" || echo "noVNC not responding"
         echo "Installing Cloudflare Tunnel..."
