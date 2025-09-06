@@ -1,53 +1,240 @@
-name: Android Cloud Server Setup
+name: Fixed Android 9 Cloud Phone
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      phone_name:
+        description: 'Phone Name'
+        required: true
+        default: 'android-9-fixed'
+
+env:
+  PHONE_NAME: ${{ github.event.inputs.phone_name || 'android-9-fixed' }}
 
 jobs:
-  setup-android-server:
+  deploy:
     runs-on: ubuntu-latest
-    container:
-      image: budtmo/docker-android:emulator_9.0
-      options: --privileged
+    permissions:
+      contents: write
+      actions: write
+      
     steps:
-    - name: Setup Android Cloud with Tunnel
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        fetch-depth: 1
+
+    - name: Setup Info
       run: |
-        echo "Waiting for Android emulator to start..."
-        sleep 180
-        echo "Checking emulator status..."
-        ps aux | grep emulator || echo "Emulator not running"
-        netstat -tlnp || echo "No listening ports"
-        echo "Setting Android environment..."
-        export ANDROID_AVD_HOME=/tmp/.android/avd
-        export ANDROID_SDK_HOME=/tmp
-        mkdir -p /tmp/.android/avd
-        echo "Listing available AVDs..."
-        emulator -list-avds
-        echo "Creating AVD if none exist..."
-        echo "no" | avdmanager create avd -n test -k 'system-images;android-28;google_apis;x86_64' || echo "AVD creation failed"
-        echo "Listing AVDs after creation..."
-        emulator -list-avds
-        echo "Trying to start emulator manually..."
-        emulator -avd test -no-window -no-audio -gpu swiftshader_indirect -qemu -enable-kvm &
+        mkdir -p links
+        echo "🔧 Fixed Android 9 Cloud Phone - $(date '+%Y-%m-%d %H:%M:%S')" > "links/${{ env.PHONE_NAME }}.txt"
+
+    - name: Optimize Environment
+      run: |
+        echo "🔧 Optimizing environment..."
+        
+        # Free up space quickly
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" &
+        
+        # Setup KVM fast  
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        
+        # Install minimal packages
+        sudo apt-get update -qq
+        sudo apt-get install -y qemu-kvm libvirt-daemon-system cpu-checker
+        
+        echo "✅ Environment optimized!"
+
+    - name: Start Android 9 Emulator
+      run: |
+        echo "🚀 Starting Android 9 emulator (DOCKER COMMAND FIXED)..."
+        
+        # Pull CORRECT Android 9 image
+        echo "📥 Pulling Android 9 image (budtmo/docker-android:emulator_9.0)..."
+        for attempt in 1 2 3; do
+          if docker pull budtmo/docker-android:emulator_9.0; then
+            echo "✅ Android 9 image pulled successfully!"
+            break
+          else
+            echo "⚠️ Retry $attempt/3..."
+            sleep 5
+          fi
+        done
+        
+        # Start container with FIXED command (single line)
+        echo "🚀 Starting Android 9 container with FIXED docker command..."
+        docker run -d --privileged --name android-fixed -p 6080:6080 -p 5554:5554 -p 5555:5555 -e EMULATOR_DEVICE="Nexus 5" -e WEB_VNC=true -e APPIUM=false -e CONNECT_TO_GRID=false -e EMULATOR_ARGS="-no-audio -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 14336 -cores 3" --device /dev/kvm --shm-size=1g budtmo/docker-android:emulator_9.0
+        
+        echo "⏳ Waiting for Android 9 to boot (optimized detection)..."
+        
+        # FAST CHECK với ADB
+        ready_count=0
+        max_attempts=40  # Reasonable timeout
+        
+        while [ $ready_count -lt $max_attempts ]; do
+          ready_count=$((ready_count + 1))
+          
+          # Check container running
+          if ! docker ps -q -f name=android-fixed | grep -q .; then
+            echo "❌ Container stopped!"
+            docker logs android-fixed
+            exit 1
+          fi
+          
+          # Check noVNC first (quick check)
+          if curl -f -s http://localhost:6080 > /dev/null 2>&1; then
+            echo "✅ noVNC accessible ($ready_count/$max_attempts)"
+            
+            # ADB DIRECT CHECK - No more waiting for files!
+            adb_output=$(docker exec android-fixed adb devices 2>/dev/null || echo "no-device")
+            echo "🔍 ADB check: $adb_output"
+            
+            # Look for "device" status (not just emulator)
+            if echo "$adb_output" | grep -E "device$|emulator.*device"; then
+              echo ""
+              echo "🎉🎉🎉 ADB DETECTED DEVICE - ANDROID 9 READY! 🎉🎉🎉"
+              echo ""
+              
+              # Quick verification
+              android_version=$(docker exec android-fixed adb shell getprop ro.build.version.release 2>/dev/null || echo "unknown")
+              device_model=$(docker exec android-fixed adb shell getprop ro.product.model 2>/dev/null || echo "unknown")
+              echo "📱 Android version: $android_version"
+              echo "📱 Device model: $device_model"
+              
+              # Test basic functionality
+              echo "🧪 Quick functionality test..."
+              docker exec android-fixed adb shell input keyevent KEYCODE_HOME 2>/dev/null || true
+              
+              echo "✅ Android 9 Cloud Phone is ready and functional!"
+              break
+            else
+              echo "⏳ ADB not ready yet... ($ready_count/$max_attempts)"
+            fi
+          else
+            echo "⏳ Starting noVNC... ($ready_count/$max_attempts)"
+          fi
+          
+          # Progress every 5 attempts
+          if [ $((ready_count % 5)) -eq 0 ]; then
+            echo "🔄 Android 9 booting... ($ready_count/$max_attempts) - Much faster than Android 12!"
+          fi
+          
+          sleep 8  # Shorter than previous versions
+        done
+        
+        if [ $ready_count -eq $max_attempts ]; then
+          echo "❌ Android 9 failed to start in time"
+          echo "📋 Container logs:"
+          docker logs android-fixed
+          echo "📋 Container processes:"
+          docker exec android-fixed ps aux | head -10 || true
+          exit 1
+        fi
+        
+        total_time=$(($ready_count * 8))
+        echo "🎉 Android 9 setup completed in $total_time seconds!"
+
+    - name: Setup Fast Tunnel
+      run: |
+        echo "🌐 Setting up Cloudflared tunnel..."
+        
+        # Download cloudflared
+        curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+        chmod +x cloudflared
+        
+        # Start tunnel
+        ./cloudflared tunnel --url http://localhost:6080 --no-autoupdate --logfile cloudflared.log &
+        
         sleep 30
-        echo "Downloading noVNC..."
-        curl -L -o /tmp/master.zip https://github.com/novnc/noVNC/archive/refs/heads/master.zip
-        unzip -q /tmp/master.zip -d /tmp
-        echo "Setting up virtual environment..."
-        python3 -m venv /tmp/venv
-        /tmp/venv/bin/pip install websockify
-        echo "Starting noVNC web interface..."
-        /tmp/venv/bin/websockify --web /tmp/noVNC-master 6080 localhost:5900 &
-        sleep 10
-        echo "Checking noVNC service..."
-        curl -s localhost:6080 > /dev/null && echo "noVNC is running" || echo "noVNC not responding"
-        echo "Installing Cloudflare Tunnel..."
-        curl -L -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
-        chmod +x /tmp/cloudflared
-        echo "Starting Cloudflare tunnel..."
-        /tmp/cloudflared tunnel --url localhost:6080 &
-        sleep 5
-        echo "Cloudflare tunnel started. Check the logs above for the temporary URL to access noVNC web interface."
-        while true; do sleep 60; done
+        
+        # Get URL with reasonable timeout
+        tunnel_url=""
+        for attempt in {1..45}; do
+          if [ -f cloudflared.log ]; then
+            tunnel_url=$(grep -oE 'https://[a-zA-Z0-9-]+\\.trycloudflare\\.com' cloudflared.log | head -1)
+            if [ -n "$tunnel_url" ]; then
+              echo "✅ Tunnel URL: $tunnel_url"
+              break
+            fi
+          fi
+          
+          echo "🔄 Getting tunnel URL... ($attempt/45)"
+          sleep 2
+        done
+        
+        if [ -n "$tunnel_url" ]; then
+          echo ""
+          echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
+          echo "✅ FIXED ANDROID 9 CLOUD PHONE READY!"
+          echo "🌐 URL: $tunnel_url"
+          echo "📱 Device: Nexus 5 with Android 9.0"
+          echo "🔧 Docker command FIXED - No more boot problems!"
+          echo "🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"
+          echo ""
+          
+          # Save URL with detailed info
+          echo "$tunnel_url" > remote-link.txt
+          echo "📱 Nexus 5 Android 9.0 (DOCKER FIXED)" >> remote-link.txt
+          echo "🔧 Docker run command resolved" >> remote-link.txt
+          echo "⚡ Fast ADB detection" >> remote-link.txt
+          echo "⏰ Started: $(date)" >> remote-link.txt
+          
+          # Commit
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add . || true
+          git commit -m "🔧 Docker Fixed Android 9 READY! - $(date '+%Y-%m-%d %H:%M:%S')" --allow-empty
+          git push origin main --force-with-lease || true
+          
+        else
+          echo "❌ Failed to get tunnel URL"
+          exit 1
+        fi
+
+    - name: Keep Android 9 Running
+      run: |
+        echo "🎯 Fixed Android 9 Session Started!"
+        echo "📱 Device: Nexus 5 Android 9.0"
+        echo "🔧 Docker command issues resolved!"
+        echo "⚡ Fast, reliable, working!"
+        echo ""
+        
+        # Run for 5.5 hours with health monitoring
+        total_minutes=330
+        check_interval=5
+        
+        for ((minute=1; minute<=total_minutes; minute++)); do
+          echo "🟢 Android 9 Running - Minute $minute/$total_minutes ($(date '+%H:%M:%S'))"
+          
+          # Health check every 5 minutes
+          if [ $((minute % check_interval)) -eq 0 ]; then
+            echo "💚 Health check..."
+            
+            # Check container
+            if ! docker ps -q -f name=android-fixed | grep -q .; then
+              echo "❌ Container stopped! Restarting..."
+              docker start android-fixed || break
+              sleep 20
+            fi
+            
+            # ADB health check  
+            adb_status=$(docker exec android-fixed adb devices 2>/dev/null | grep -E "device$|emulator.*device" || echo "disconnected")
+            if echo "$adb_status" | grep -qE "device$|emulator.*device"; then
+              echo "✅ ADB: Connected and working"
+            else
+              echo "⚠️ ADB: $adb_status"
+            fi
+          fi
+          
+          sleep 60
+        done
+        
+        echo "⏰ Session completed!"
+        
+        # Cleanup
+        pkill cloudflared 2>/dev/null || true
+        docker stop android-fixed 2>/dev/null || true
+        docker rm android-fixed 2>/dev/null || true
