@@ -17,7 +17,7 @@ jobs:
         echo "Waiting for Android emulator to start..."
         sleep 120
         echo "Downloading noVNC..."
-        wget -q https://github.com/novnc/noVNC/archive/refs/heads/master.zip
+        curl -L -o master.zip https://github.com/novnc/noVNC/archive/refs/heads/master.zip
         unzip -q master.zip
         echo "Setting up virtual environment..."
         python3 -m venv /tmp/venv
