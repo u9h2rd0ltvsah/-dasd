@@ -30,7 +30,4 @@ jobs:
         /tmp/cloudflared tunnel --url localhost:6080 &
         sleep 5
         echo "Cloudflare tunnel started. Check the logs above for the temporary URL to access noVNC web interface."
-
-    - name: Keep workflow running
-      run: |
         while true; do sleep 60; done
